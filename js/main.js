@@ -3,17 +3,18 @@ const CATEGORY_API = "https://dummyjson.com/products/categories"
 
 
 let productsContainer = document.querySelector("#products-container");
-let categoryFilters = document.querySelector("#category-filters")
+let categoryFilters = document.querySelector("#category-filters");
+let searchInput = document.querySelector("#search-input")
 let allCategories = []
 
 async function fetchProducts(url) {
   const response = await fetch(url);
-  const data1 = await response.json();
-  renderProducts(data1.products)
+  const data = await response.json();
+  renderProducts(data.products)
 
 }
 
-fetchProducts(API)
+
 
 function renderProducts(products) {
   productsContainer.innerHTML = ""
@@ -37,7 +38,7 @@ function renderProducts(products) {
                 ₹${(product.price * 96.82).toFixed(2)}
               </span>
             </div>
-            <a href="product-details.html"
+            <a href="product-details.html?id=${product.id}"
               class="mt-4 block w-full text-center bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium py-2 px-4 rounded transition">
               View Details
             </a>
@@ -57,7 +58,7 @@ async function fetchCategories() {
   renderCategories()
 }
 
-fetchCategories()
+
 
 function renderCategories(currentCategory="all") {
   categoryFilters.innerHTML = ""
@@ -84,7 +85,22 @@ categoryFilters.addEventListener("click", (e) => {
   let url = element.dataset.url
   console.log(url);
   const category = element.dataset.category;
-  renderCategories(category)
   fetchProducts(url);
+  renderCategories(category)
 
 })
+
+if(productsContainer){
+  fetchProducts(API);
+  fetchCategories();
+}
+
+if(searchInput){
+  searchInput.addEventListener("input",(e)=>{
+  e.stopPropagation();
+  let value = searchInput.value;
+  let url = `https://dummyjson.com/products/search?q=${value}`
+  fetchProducts(url)
+  console.log(value);
+})
+}
