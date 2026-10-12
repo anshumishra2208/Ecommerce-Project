@@ -4,21 +4,22 @@ const CATEGORY_API = "https://dummyjson.com/products/categories"
 
 let productsContainer = document.querySelector("#products-container");
 let categoryFilters = document.querySelector("#category-filters")
+let allCategories = []
 
-async function fetchProducts() {
-    const response = await fetch("https://dummyjson.com/products");
-    const data = await response.json();
-    renderProducts(data.products)
-    // console.log(data);
+async function fetchProducts(url) {
+  const response = await fetch(url);
+  const data1 = await response.json();
+  renderProducts(data1.products)
+
 }
 
-fetchProducts()
+fetchProducts(API)
 
 function renderProducts(products) {
-    productsContainer.innerHTML = ""
-    products.forEach((product) => {
-        let article = document.createElement("article")
-        let card = `<article
+  productsContainer.innerHTML = ""
+  products.forEach((product) => {
+    let article = document.createElement("article")
+    let card = `<article
           class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition">
           <div class="h-48 w-full flex items-center justify-center p-3 mb-4 bg-white">
             <img src=${product.thumbnail}
@@ -43,29 +44,47 @@ function renderProducts(products) {
           </div>
         </article>
         `
-        article.innerHTML = card;
-        productsContainer.append(article)
-    })
+    article.innerHTML = card;
+    productsContainer.append(article)
+  })
 }
 
 async function fetchCategories() {
-    const response = await fetch("https://dummyjson.com/products/categories");
-    const data = await response.json();
-    renderCategories(data)
-    console.log(data);
+  const response = await fetch("https://dummyjson.com/products/categories");
+  const data = await response.json();
+  console.log(data);
+  allCategories = [{name : "all",slug: "all", url : API},...data]
+  renderCategories()
 }
 
 fetchCategories()
 
-function renderCategories(categories) {
-    categoryFilters.innerHTML = ""
-    let sab = [{ name: "all", slug: "all" }, ...categories]
-    sab.forEach((category) => {
-        let button = document.createElement("article")
-        button.className = "px-4 py-1.5 rounded-md text-sm capitalize font-medium bg-teal-700 text-white transition"
-
-        button.innerHTML = `${category.slug}`
-        categoryFilters.append(button)
-    })
+function renderCategories(currentCategory="all") {
+  categoryFilters.innerHTML = ""
+  allCategories.forEach(({name,slug,url}) => {
+    let button = document.createElement("article")
+    if(currentCategory===slug){
+      button.className = "px-4 py-1.5 rounded-md text-sm capitalize font-medium bg-teal-700 text-white transition"
+    }
+    else{
+        button.className = "px-4 py-1.5 rounded-md text-sm capitalize font-medium bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 transition"
+    }
+    
+    button.innerHTML = `${slug}`
+    button.dataset.url = url
+    button.dataset.category = slug
+    
+    categoryFilters.append(button)
+  })
 }
 
+categoryFilters.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const element = e.target;
+  let url = element.dataset.url
+  console.log(url);
+  const category = element.dataset.category;
+  renderCategories(category)
+  fetchProducts(url);
+
+})
